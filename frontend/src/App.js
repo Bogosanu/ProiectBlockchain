@@ -3,6 +3,10 @@ import { ethers } from "ethers";
 import twoerrABI from "./jsons/Twoerr.json";
 import twoerrCoinABI from "./jsons/TwoerrCoin.json";
 import addresses from "./jsons/deployedAddresses.json";
+import Layout from './layout';
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Register from './register'; // Adaugă această pagină
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
@@ -57,20 +61,29 @@ const App = () => {
   };
 
   return (
-      <div>
-        <h1>Local Ethereum DApp</h1>
-        {accounts.length > 0 ? (
-            <div>
-              <p><strong>Account:</strong> {accounts[0]}</p>
-              <p><strong>ETH Balance:</strong> {ethBalance} ETH</p>
-              <p><strong>TwoerrCoin Balance:</strong> {tokenBalance} TWC</p>
-              <button onClick={callContractFunction}>Call Contract Function</button>
-              {contractData && <p><strong>Contract Data:</strong> {contractData.toString()}</p>}
-            </div>
-        ) : (
-            <p>Connecting to local Ethereum network...</p>
-        )}
-      </div>
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Layout>
+              {accounts.length > 0 ? (
+                <div className="bodyClass">
+                  <p><strong>Account:</strong> {accounts[0]}</p>
+                  <p><strong>Balance:</strong> {balance} ETH</p>
+                  <p><strong>TwoerrCoin Balance:</strong> {tokenBalance} TWC</p>
+                  <button onClick={callContractFunction}>Call Contract Function</button>
+                  {contractData && <p><strong>Contract Data:</strong> {contractData.toString()}</p>}
+                </div>
+              ) : (
+                <p>Connecting to local Ethereum network...</p>
+              )}
+            </Layout>
+          }
+        />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </Router>
   );
 };
 
