@@ -6,7 +6,10 @@ import addresses from "./jsons/deployedAddresses.json";
 import Layout from './layout';
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Register from './register'; // Adaugă această pagină
+import Register from './register'; 
+import RegisterClient from "./RegisterClient";
+import RegisterProvider from "./RegisterProvider";
+
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
@@ -70,7 +73,7 @@ const App = () => {
               {accounts.length > 0 ? (
                 <div className="bodyClass">
                   <p><strong>Account:</strong> {accounts[0]}</p>
-                  <p><strong>Balance:</strong> {balance} ETH</p>
+                  <p><strong>Balance:</strong> {ethBalance} ETH</p>
                   <p><strong>TwoerrCoin Balance:</strong> {tokenBalance} TWC</p>
                   <button onClick={callContractFunction}>Call Contract Function</button>
                   {contractData && <p><strong>Contract Data:</strong> {contractData.toString()}</p>}
@@ -82,6 +85,8 @@ const App = () => {
           }
         />
         <Route path="/register" element={<Register />} />
+        <Route path="/RegisterClient" element = {<RegisterClient/>}/>
+        <Route path="/RegisterProvider" element = {<RegisterProvider/>}/>
       </Routes>
     </Router>
   );
