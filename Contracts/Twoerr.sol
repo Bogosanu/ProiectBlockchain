@@ -56,7 +56,7 @@ contract Twoerr {
     _;
     }
 
-    function createService(string memory _title, string memory _description, uint _price) public onlyOwner(msg.sender) {
+    function createService(string memory _title, string memory _description, uint _price) external onlyOwner(msg.sender) {
         serviceCounter++;
         services[serviceCounter] = Service({
             id: serviceCounter,
@@ -73,10 +73,10 @@ contract Twoerr {
 
     
 
-    function placeOrder(uint _serviceId) public payable {
+    function placeOrder(uint _serviceId) external payable {
         Service memory service = services[_serviceId];
         require(service.isActive, "Service is not active");
-        require(msg.value != service.price, "Insufficient payment");
+        require(msg.value == service.price, "Insufficient payment");
 
         orderCounter++;
         orders[orderCounter] = Order({
@@ -96,8 +96,10 @@ contract Twoerr {
         require(msg.sender == order.provider, "Only the provider can complete the order");
         require(!order.isCompleted, "Order is already completed");
 
+        (bool success, ) = payable(msg.sender).call{value: orders[_orderId].price}(""); 
+        require(success, "Transfer failed"); 
         order.isCompleted = true;
-        order.provider.transfer(order.price);
+
 
         emit OrderCompleted(_orderId);
     }
