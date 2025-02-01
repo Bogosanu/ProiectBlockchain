@@ -1,0 +1,116 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\Denis\\Desktop\\repos\\ProiectBlockchain\\Contracts\\Twoerr.sol": {
+      "lastModificationDate": 1738423845538,
+      "contentHash": "9776738281ef38a2ffce7cb363200139",
+      "sourceName": "Contracts/Twoerr.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Provider.sol",
+        "./Client.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Twoerr"
+      ]
+    },
+    "C:\\Users\\Denis\\Desktop\\repos\\ProiectBlockchain\\Contracts\\Client.sol": {
+      "lastModificationDate": 1738411646063,
+      "contentHash": "f87ca2c295a97421da510e5ccf843f48",
+      "sourceName": "Contracts/Client.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Client"
+      ]
+    },
+    "C:\\Users\\Denis\\Desktop\\repos\\ProiectBlockchain\\Contracts\\Provider.sol": {
+      "lastModificationDate": 1738423399663,
+      "contentHash": "5dcec66f6c00a252dbf0bac2cd4000d6",
+      "sourceName": "Contracts/Provider.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Provider"
+      ]
+    }
+  }
+}
