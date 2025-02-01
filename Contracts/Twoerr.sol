@@ -148,4 +148,8 @@ contract Twoerr {
         return (service.title,order.price,order.isCompleted);
     }
 
+
+    receive() external payable {}
+
+    fallback() external payable { }
 }
