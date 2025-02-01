@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import contractABI from "./jsons/Twoerr.json";
+import twoerrABI from "./jsons/Twoerr.json";
+import twoerrCoinABI from "./jsons/TwoerrCoin.json";
 import addresses from "./jsons/deployedAddresses.json";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
-const CONTRACT_ADDRESS = addresses.Twoerr;
+const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
+const TWOERRCOIN_CONTRACT_ADDRESS = addresses.TwoerrCoin;
 
 const App = () => {
   const [provider, setProvider] = useState(null);
   const [accounts, setAccounts] = useState([]);
-  const [balance, setBalance] = useState("");
-  const [contract, setContract] = useState(null);
+  const [ethBalance, setEthBalance] = useState("");
+  const [tokenBalance, setTokenBalance] = useState("");
+  const [twoerrContract, setTwoerrContract] = useState(null);
+  const [twoerrCoinContract, setTwoerrCoinContract] = useState(null);
   const [contractData, setContractData] = useState("");
 
   useEffect(() => {
@@ -23,26 +27,30 @@ const App = () => {
 
       if (accountsList.length > 0) {
         const balanceWei = await provider.getBalance(accountsList[0]);
-        setBalance(ethers.utils.formatEther(balanceWei)); // Convert to ETH
-      }
+        setEthBalance(ethers.utils.formatEther(balanceWei)); // Convert to ETH
 
-      // Initialize the contract
-      const signer = provider.getSigner(accountsList[0]);
-      const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, contractABI.abi, signer);
-      setContract(contractInstance);
+        const signer = provider.getSigner(accountsList[0]);
+        const twoerrInstance = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
+        const twoerrCoinInstance = new ethers.Contract(TWOERRCOIN_CONTRACT_ADDRESS, twoerrCoinABI.abi, signer);
+
+        setTwoerrContract(twoerrInstance);
+        setTwoerrCoinContract(twoerrCoinInstance);
+
+        const tokenBalance = await twoerrCoinInstance.balanceOf(accountsList[0]);
+        setTokenBalance(ethers.utils.formatEther(tokenBalance)); // Convert from Wei
+      }
     };
 
     connectToBlockchain();
   }, []);
 
-  // Function to interact with the smart contract
   const callContractFunction = async () => {
-    if (!contract) return alert("Contract is not connected!");
+    if (!twoerrContract) return alert("Contract is not connected!");
 
     try {
-      const response = await contract.someFunction();
+      const response = await twoerrContract.someFunction();
       console.log("Contract Response:", response);
-      setContractData(response); // Store the result of the contract call
+      setContractData(response);
     } catch (error) {
       console.error("Error interacting with contract:", error);
     }
@@ -54,7 +62,8 @@ const App = () => {
         {accounts.length > 0 ? (
             <div>
               <p><strong>Account:</strong> {accounts[0]}</p>
-              <p><strong>Balance:</strong> {balance} ETH</p>
+              <p><strong>ETH Balance:</strong> {ethBalance} ETH</p>
+              <p><strong>TwoerrCoin Balance:</strong> {tokenBalance} TWC</p>
               <button onClick={callContractFunction}>Call Contract Function</button>
               {contractData && <p><strong>Contract Data:</strong> {contractData.toString()}</p>}
             </div>

@@ -19,16 +19,23 @@ async function deploy() {
     console.log("Client contract deployed at:", client.address);
 
 
+
+    const TwoerrCoin = await ethers.getContractFactory("TwoerrCoin");
+    const twoerrcoin = await TwoerrCoin.deploy();
+    await twoerrcoin.deployed();
+    console.log("TwoerrCoin contract deployed at:", twoerrcoin.address);
+
+
     const Twoerr = await ethers.getContractFactory("Twoerr");
-    const twoerr = await Twoerr.deploy(provider.address, client.address);
+    const twoerr = await Twoerr.deploy(provider.address, client.address, twoerrcoin.address);
     await twoerr.deployed();
     console.log("Twoerr contract deployed at:", twoerr.address);
-
 
     const addresses = {
         Provider: provider.address,
         Client: client.address,
         Twoerr: twoerr.address,
+        TwoerrCoin: twoerrcoin.address,
     };
 
     const outputFilePath = path.join(__dirname, "../frontend/src/jsons/deployedAddresses.json");
