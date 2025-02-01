@@ -25,7 +25,6 @@ contract Twoerr {
     }
 
     struct Review {
-        uint orderId;
         uint rating;
         string comment;
     }
@@ -35,7 +34,8 @@ contract Twoerr {
 
     mapping(uint => Service) public services;
     mapping(uint => Order) public orders;
-    mapping(uint => Review) public reviews;
+    mapping(uint => Review[]) public reviews;
+
 
     Provider public providerContract;
     Client public clientContract;
@@ -109,11 +109,11 @@ contract Twoerr {
         require(msg.sender == order.client, "Only the client can leave a review");
         require(order.isCompleted, "Order must be completed before leaving a review");
 
-        reviews[_orderId] = Review({
-            orderId: _orderId,
+        
+        reviews[_orderId].push(Review({
             rating: _rating,
             comment: _comment
-        });
+        }));
 
         emit ReviewLeft(_orderId, _rating, _comment);
     }
@@ -130,4 +130,22 @@ contract Twoerr {
 
         return earnings;
     }
+
+    function GetService(uint _id) external view returns (string memory, string memory, uint, bool) {
+        Service storage serv = services[_id];
+        return (serv.title, serv.description, serv.price, serv.isActive);
+    }
+
+    function GetReview(uint _orderId, uint _reviewId) external view returns (string memory, uint){
+        Review storage rev = reviews[_orderId][_reviewId];
+        return (rev.comment,rev.rating);
+    }
+
+    function GetOrder(uint _orderId) external view returns (string memory, uint, bool){
+        Order storage order = orders[_orderId];
+        Service storage service = services[order.serviceId];
+
+        return (service.title,order.price,order.isCompleted);
+    }
+
 }
