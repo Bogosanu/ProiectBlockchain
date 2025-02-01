@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Corectat: folosim { Link }
+import { Link } from 'react-router-dom';
 
 const Layout = ({ children }) => {
   return (

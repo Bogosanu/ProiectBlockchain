@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from './layout'; 
+import { Link } from 'react-router-dom';
 
 const Register = () => {
   return (
@@ -14,7 +15,8 @@ const Register = () => {
               <li>Wait for the provider to finish it</li>
               <li>Leave a review</li>
             </ul>
-            <button style={styles.signUpButton}>Sign Me Up</button>
+            <Link to="/RegisterClient"><button style={styles.signUpButton}>Sign Me Up</button></Link>
+            
           </div>
           <div style={{ ...styles.box, ...styles.goldBox }}>
             <h2 style={styles.title}>Provider</h2>
@@ -25,7 +27,7 @@ const Register = () => {
               <li>Get your well deserved money</li>
               <li>Get reviews on your work</li>
             </ul>
-            <button style={styles.signUpButton}>Sign Me Up</button>
+            <Link to="/RegisterProvider"><button style={styles.signUpButton}>Sign Me Up</button></Link>
           </div>
         </div>
       </div>
