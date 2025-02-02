@@ -19,7 +19,8 @@ const ServiceDetail = ({ currentAccount }) => {
   const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [isClient, setIsClient] = useState(false);
-  const [isProvider, setIsProvider] = useState(false);
+  const [isProvider, setIsProvider] = useState(false); // General provider role
+  const [isOwningProvider, setIsOwningProvider] = useState(false); // Is this provider the owner of this service?
   const [providerInfo, setProviderInfo] = useState({ name: "", contactInfo: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -28,6 +29,7 @@ const ServiceDetail = ({ currentAccount }) => {
 
   useEffect(() => {
     if (!currentAccount) return;
+
     const fetchServiceDetails = async () => {
       try {
         console.log("Current Account:", currentAccount);
@@ -67,8 +69,12 @@ const ServiceDetail = ({ currentAccount }) => {
         const clientInfo = await clientContract.clients(currentAccount);
         setIsClient(clientInfo && clientInfo[0].length > 0);
 
-        // Check if user is the provider
-        setIsProvider(providerAddress === currentAccount);
+        // Check if user is a provider (general)
+        const providerInfo = await providerContract.providers(currentAccount);
+        setIsProvider(providerInfo && providerInfo[0].length > 0);
+
+        // Check if user is the **specific provider** for this service
+        setIsOwningProvider(providerAddress === currentAccount);
 
         setLoading(false);
       } catch (err) {
@@ -143,68 +149,65 @@ const ServiceDetail = ({ currentAccount }) => {
   if (error) return <p>{error}</p>;
 
   return (
-    <Layout>
-      <div style={styles.container}>
-        <div style={styles.leftSection}>
-          <h1 style={styles.title}>{service.title}</h1>
-          <p style={styles.description}>{service.description}</p>
+      <Layout isProvider={isProvider}> {/* ✅ Pass isProvider to Layout */}
+        <div style={styles.container}>
+          <div style={styles.leftSection}>
+            <h1 style={styles.title}>{service.title}</h1>
+            <p style={styles.description}>{service.description}</p>
 
-          {/* Display Provider Details */}
-          <div style={styles.providerBox}>
-            <h3>Provider Information</h3>
-            <p><strong>Name:</strong> {providerInfo.name || "Not available"}</p>
-            <p><strong>Contact Info:</strong> {providerInfo.contactInfo || "Not available"}</p>
-          </div>
-        </div>
-
-        <div style={styles.rightSection}>
-          <div style={styles.priceBox}>
-            <p style={styles.price}>{service.price} ETH</p>
-            <p style={{ color: service.isActive ? "#4CAF50" : "#f44336" }}>
-              {service.isActive ? "🟢 Active" : "🔴 Inactive"}
-            </p>
-          </div>
-
-          {/* Toggle Button for Providers */}
-          {isProvider && (
-            <button onClick={toggleServiceStatus} style={styles.toggleButton}>
-              {service.isActive ? "Deactivate Service" : "Activate Service"}
-            </button>
-          )}
-
-          {/* Payment Options (Visible to Clients Only) */}
-          {isClient && service.isActive && (
-            <div style={styles.paymentBox}>
-              <h3>Select Payment Method</h3>
-              <label style={styles.radioOption}>
-                <input type="radio" name="paymentMethod" value="ETH" checked={!useTokens} onChange={() => setUseTokens(false)} />
-                Pay with ETH
-              </label>
-              <label style={styles.radioOption}>
-                <input type="radio" name="paymentMethod" value="Tokens" checked={useTokens} onChange={() => setUseTokens(true)} />
-                Pay with Tokens
-              </label>
+            {/* Display Provider Details */}
+            <div style={styles.providerBox}>
+              <h3>Provider Information</h3>
+              <p><strong>Name:</strong> {providerInfo.name || "Not available"}</p>
+              <p><strong>Contact Info:</strong> {providerInfo.contactInfo || "Not available"}</p>
             </div>
-          )}
+          </div>
 
-          {/* Add space between payment selection and button */}
-          {isClient && service.isActive && <div style={{ marginBottom: "20px" }}></div>}
+          <div style={styles.rightSection}>
+            <div style={styles.priceBox}>
+              <p style={styles.price}>{service.price} ETH</p>
+              <p style={{ color: service.isActive ? "#4CAF50" : "#f44336" }}>
+                {service.isActive ? "🟢 Active" : "🔴 Inactive"}
+              </p>
+            </div>
 
-          {/* Purchase Button (Only Clients Can See) */}
-          {isClient && service.isActive && (
-            <button onClick={handlePurchase} style={styles.purchaseButton}>
-              Purchase Service
-            </button>
-          )}
+            {/* Toggle Button for Owning Providers */}
+            {isOwningProvider && (
+                <button onClick={toggleServiceStatus} style={styles.toggleButton}>
+                  {service.isActive ? "Deactivate Service" : "Activate Service"}
+                </button>
+            )}
 
-          {success && <p style={{ color: "green" }}>{success}</p>}
+            {/* Payment Options (Visible to Clients Only) */}
+            {isClient && service.isActive && (
+                <div style={styles.paymentBox}>
+                  <h3>Select Payment Method</h3>
+                  <label style={styles.radioOption}>
+                    <input type="radio" name="paymentMethod" value="ETH" checked={!useTokens} onChange={() => setUseTokens(false)} />
+                    Pay with ETH
+                  </label>
+                  <label style={styles.radioOption}>
+                    <input type="radio" name="paymentMethod" value="Tokens" checked={useTokens} onChange={() => setUseTokens(true)} />
+                    Pay with Tokens
+                  </label>
+                </div>
+            )}
+
+            {isClient && service.isActive && (
+                <button onClick={handlePurchase} style={styles.purchaseButton}>
+                  Purchase Service
+                </button>
+            )}
+
+            {success && <p style={{ color: "green" }}>{success}</p>}
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
   );
 };
 
 export default ServiceDetail;
+
 
 // Styles
 const styles = {
