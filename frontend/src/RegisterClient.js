@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import { ethers } from "ethers";
 import twoerrABI from "./jsons/Twoerr.json"; 
 import clientABI from "./jsons/Client.json"; 
+import providerABI from "./jsons/Provider.json"; // Import provider ABI
 import addresses from "./jsons/deployedAddresses.json";
 import Layout from './layout';
 import { useNavigate } from "react-router-dom";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr; // Adresa contractului Twoerr
+const CLIENT_CONTRACT_ADDRESS = addresses.Client;
+const PROVIDER_CONTRACT_ADDRESS = addresses.Provider;
 
-const Register = () => {
+const RegisterClient = ({ currentAccount }) => {
   const [name, setName] = useState("");
   const [contactInfo, setContactInfo] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,7 @@ const Register = () => {
 
     try {
       const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
-      const signer = provider.getSigner();
+      const signer = provider.getSigner(currentAccount);
 
       // Creează o instanță a contractului Twoerr
       const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
@@ -35,6 +38,13 @@ const Register = () => {
 
       // Creează o instanță a contractului Client folosind adresa obținută
       const clientContract = new ethers.Contract(clientContractAddress, clientABI.abi, signer);
+
+      // Check if already registered as a provider
+      const providerInfo = await new ethers.Contract(PROVIDER_CONTRACT_ADDRESS, providerABI.abi, signer).providers(await signer.getAddress());
+      if (providerInfo[0].length > 0) {
+        setError("You are already registered as a provider.");
+        return;
+      }
 
       // Înregistrează clientul folosind contractul Client
       const tx = await clientContract.registerClient(name, contactInfo);
@@ -92,7 +102,7 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterClient;
 
 // Stiluri (la fel ca înainte)
 const styles = {

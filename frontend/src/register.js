@@ -55,13 +55,14 @@ const styles = {
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
     width: '45%',
     textAlign: 'center',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   },
   silverBox: {
-    backgroundColor: '#c0c0c0',
+    backgroundColor: '#e0e0e0',
     color: '#000',
   },
   goldBox: {
-    backgroundColor: '#ffd700',
+    backgroundColor: '#ffeb3b',
     color: '#000',
   },
   title: {
@@ -69,21 +70,22 @@ const styles = {
     fontSize: '48px',
   },
   list: {
-    listStyleType: 'disc', // Adaugă puncte (•) în loc de cercuri goale
-    paddingLeft: '20px',   // Aliniază textul listei
+    listStyleType: 'disc',
+    paddingLeft: '20px',
     textAlign: 'left',
-    fontSize: '24px',     // Asigură-te că textul este aliniat la stânga
+    fontSize: '24px',
   },
-  signUpButton: { // Poziționează butonul absolut în interiorul boxului
-    bottom: '20px',       // Distanța de la partea de jos a boxului
-    left: '50%',          // Centrează butonul pe orizontală
-    backgroundColor: '#4CAF50', // Culoare de fundal verde
-    color: 'white',       // Culoare text alb
-    padding: '15px 30px', // Padding pentru buton
-    border: 'none',       // Elimină bordura implicită
-    borderRadius: '5px',  // Rotunjeste colțurile
-    fontSize: '30px',     // Mărimea textului
-    cursor: 'pointer',    // Cursor pointer la hover
+  signUpButton: {
+    bottom: '20px',
+    left: '50%',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    padding: '15px 30px',
+    border: 'none',
+    borderRadius: '5px',
+    fontSize: '30px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
   },
 };
 
