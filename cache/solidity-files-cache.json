@@ -38,8 +38,8 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\Twoerr.sol": {
-      "lastModificationDate": 1738525971304,
-      "contentHash": "6bbc800ce6acbc3bdaa7debfedfa3678",
+      "lastModificationDate": 1738529051903,
+      "contentHash": "f8f0e024e1f5b037e41fb977f40eb1fe",
       "sourceName": "Contracts/Twoerr.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -302,8 +302,8 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\Conversion.sol": {
-      "lastModificationDate": 1738438955878,
-      "contentHash": "2544a5562bca3febd34183e9d9dd7ddd",
+      "lastModificationDate": 1738533517180,
+      "contentHash": "8e81d00087fd70fe568bcf5931a6512e",
       "sourceName": "Contracts/Conversion.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -410,6 +410,44 @@
       ],
       "artifacts": [
         "AggregatorV3Interface"
+      ]
+    },
+    "D:\\ProiectBlockchain\\Contracts\\MockV3Aggregator.sol": {
+      "lastModificationDate": 1738532150987,
+      "contentHash": "2b2320c6a811ab25bc52097f9d0ff835",
+      "sourceName": "Contracts/MockV3Aggregator.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "MockV3Aggregator"
       ]
     }
   }
