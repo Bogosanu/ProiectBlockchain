@@ -14,6 +14,9 @@ const Layout = ({ children, isProvider }) => {
         <Link to={isProvider ? "/ProviderOrders" : "/ClientOrders"}>
           <button style={styles.joinButton}>My Orders</button>
         </Link>
+        <Link to="/Converter">
+          <button style={styles.joinButton}>Converter</button>
+        </Link>
       </header>
       <main style={styles.main}>
         {children}

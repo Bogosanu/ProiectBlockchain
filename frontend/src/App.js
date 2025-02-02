@@ -15,6 +15,8 @@ import ServicePage from "./Service";
 import ServicesPage from "./Services";
 import ServiceDetail from "./ServiceDetail";
 import ClientOrders from "./ClientOrders";
+import Converter from "./Converter";
+
 import ProviderOrders from "./ProviderOrders";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
@@ -32,6 +34,9 @@ const App = () => {
   const [isProvider, setIsProvider] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [userInfo, setUserInfo] = useState({ name: "", contactInfo: "" });
+
+  // Adaugă un state pentru a stoca notificările
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const connectToBlockchain = async () => {
@@ -114,41 +119,80 @@ const App = () => {
     }
   }, [currentAccount, provider]);
 
-  return (
-      <Router>
-        <Routes>
-          <Route
-              path="/"
-              element={
-                <Layout isProvider={isProvider}>
-                  <div style={{ padding: "20px", backgroundColor: "#f5f5f5", minHeight: "100vh", textAlign: "center" }}>
-                    {currentAccount ? (
-                        <div style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", maxWidth: "600px", margin: "0 auto" }}>
-                          <h2>Account Details</h2>
-                          <p><strong>Account:</strong> {currentAccount}</p>
-                          <p><strong>Name:</strong> {userInfo.name || "Not registered"}</p>
-                          <p><strong>Contact Info:</strong> {userInfo.contactInfo || "Not registered"}</p>
-                          <p><strong>Balance:</strong> {ethBalance} ETH</p>
-                          <p><strong>TwoerrCoin Balance:</strong> {tokenBalance} TWC</p>
+  useEffect(() => {
+    if (!provider || !currentAccount) return;
 
-                          <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "20px" }}>
-                            {isProvider && (
-                                <Link to="/Service">
-                                  <button style={{ backgroundColor: "#007bff", color: "#fff", padding: "10px 20px", border: "none", borderRadius: "5px", fontSize: "16px", cursor: "pointer" }}>
-                                    Create Service
-                                  </button>
-                                </Link>
-                            )}
-                            <Link to="/Services">
-                              <button style={{ backgroundColor: "#007bff", color: "#fff", padding: "10px 20px", border: "none", borderRadius: "5px", fontSize: "16px", cursor: "pointer" }}>
-                                See Services
-                              </button>
-                            </Link>
-                          </div>
-                        </div>
-                    ) : (
-                        <p>Connecting to local Ethereum network...</p>
-                    )}
+    const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, provider);
+
+    const handleOrderNotification = (providerAddress, title) => {
+      // Verifică dacă notificarea este pentru providerul curent
+      if (providerAddress.toLowerCase() === currentAccount.toLowerCase()) {
+        setNotifications((prevNotifications) => [
+          ...prevNotifications,
+          `New order for service: ${title}`,
+        ]);
+      }
+    };
+
+    // Ascultă evenimentul OrderNotification
+    twoerrContract.on("OrderNotification", handleOrderNotification);
+
+    // Cleanup la unmount
+    return () => {
+      twoerrContract.off("OrderNotification", handleOrderNotification);
+    };
+  }, [provider, currentAccount]);
+
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Layout isProvider={isProvider}>
+              <div style={{ padding: "20px", backgroundColor: "#f5f5f5", minHeight: "100vh", textAlign: "center" }}>
+                {currentAccount ? (
+                  <div style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", maxWidth: "600px", margin: "0 auto" }}>
+                    <h2>Account Details</h2>
+                    <p><strong>Account:</strong> {currentAccount}</p>
+                    <p><strong>Name:</strong> {userInfo.name || "Not registered"}</p>
+                    <p><strong>Contact Info:</strong> {userInfo.contactInfo || "Not registered"}</p>
+                    <p><strong>Balance:</strong> {ethBalance} ETH</p>
+                    <p><strong>TwoerrCoin Balance:</strong> {tokenBalance} TWC</p>
+
+                    <div style={{ marginTop: "20px" }}>
+                      <h3>Notifications</h3>
+                      {notifications.length > 0 ? (
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                          {notifications.map((notification, index) => (
+                            <li key={index} style={{ margin: "10px 0", padding: "10px", backgroundColor: "#f0f0f0", borderRadius: "5px" }}>
+                              {notification}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No notifications yet.</p>
+                      )}
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "20px" }}>
+                      {isProvider && (
+                        <Link to="/Service">
+                          <button style={{ backgroundColor: "#007bff", color: "#fff", padding: "10px 20px", border: "none", borderRadius: "5px", fontSize: "16px", cursor: "pointer" }}>
+                            Create Service
+                          </button>
+                        </Link>
+                      )}
+                      <Link to="/Services">
+                        <button style={{ backgroundColor: "#007bff", color: "#fff", padding: "10px 20px", border: "none", borderRadius: "5px", fontSize: "16px", cursor: "pointer" }}>
+                          See Services
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <p>Connecting to local Ethereum network...</p>
+                )}
               </div>
             </Layout>
           }
@@ -160,10 +204,11 @@ const App = () => {
         <Route path="/Services" element={<ServicesPage currentAccount={currentAccount} />} />
         <Route path="/ServiceDetail/:id" element={<ServiceDetail currentAccount={currentAccount} />} />
         <Route path="/ClientOrders" element={<ClientOrders currentAccount={currentAccount} />} />
+        <Route path="/Converter" element={<Converter currentAccount={currentAccount} />} />
         <Route path="/ProviderOrders" element={<ProviderOrders currentAccount={currentAccount} />} />
       </Routes>
     </Router>
   );
 };
 
-export default App;
+export default App
