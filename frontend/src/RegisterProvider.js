@@ -41,7 +41,7 @@ const Register = () => {
       setContactInfo("");
       
       setTimeout(() => {
-        navigate("/"); // Navighează către ruta principală
+        navigate("/"); 
       }, 2000); 
 
 
