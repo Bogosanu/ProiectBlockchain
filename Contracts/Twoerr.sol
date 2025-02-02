@@ -130,9 +130,16 @@ contract Twoerr {
         return earnings;
     }
 
-    function GetService(uint _id) public view returns (string memory, string memory, uint, bool) {
-        Service storage serv = services[_id];
-        return (serv.title, serv.description, serv.price, serv.isActive);
+    function GetService(uint _id) external view returns (string memory, string memory, uint, bool, uint, address) {
+        Service memory service = services[_id];
+        return (
+            service.title,
+            service.description,
+            service.price,
+            service.isActive,
+            service.id,
+            service.provider
+        );
     }
 
     function GetReview(uint _orderId, uint _reviewId) public view returns (string memory, uint) {

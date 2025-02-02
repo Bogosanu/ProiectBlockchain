@@ -1,42 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import twoerrABI from "./jsons/Twoerr.json";
 import clientABI from "./jsons/Client.json";
+import providerABI from "./jsons/Provider.json";
+import twoerrCoinABI from "./jsons/TwoerrCoin.json";
 import addresses from "./jsons/deployedAddresses.json";
 import Layout from "./layout";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
 const CLIENT_CONTRACT_ADDRESS = addresses.Client;
+const PROVIDER_CONTRACT_ADDRESS = addresses.Provider;
+const TWOERRCOIN_CONTRACT_ADDRESS = addresses.TwoerrCoin;
 
 const ServiceDetail = ({ currentAccount }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [isClient, setIsClient] = useState(false);
+  const [providerInfo, setProviderInfo] = useState({ name: "", contactInfo: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [useTokens, setUseTokens] = useState(false);
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
+    if (!currentAccount) return;
     const fetchServiceDetails = async () => {
       try {
-        const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
-        const signer = provider.getSigner(currentAccount);
+        console.log("Current Account:", currentAccount);
+        console.log("Service ID:", id);
 
+        const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+        const signer = provider.getSigner();
         const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
         const clientContract = new ethers.Contract(CLIENT_CONTRACT_ADDRESS, clientABI.abi, signer);
+        const providerContract = new ethers.Contract(PROVIDER_CONTRACT_ADDRESS, providerABI.abi, signer);
 
+        // Fetch service details
         const serviceData = await twoerrContract.GetService(id);
+        const providerAddress = serviceData[5];
+
         setService({
           id: id,
           title: serviceData[0],
           description: serviceData[1],
           price: ethers.utils.formatEther(serviceData[2]),
           isActive: serviceData[3],
+          providerAddress: providerAddress,
         });
 
+        // Fetch provider details
+        if (providerAddress !== ethers.constants.AddressZero) {
+          const providerDetails = await providerContract.providers(providerAddress);
+          if (providerDetails[0].length > 0) {
+            setProviderInfo({
+              name: providerDetails[0],
+              contactInfo: providerDetails[1],
+            });
+          }
+        }
+
+        // Check if user is a client
         const clientInfo = await clientContract.clients(currentAccount);
-        setIsClient(clientInfo && clientInfo.name.length > 0);
+        setIsClient(clientInfo && clientInfo[0].length > 0);
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching service details:", err);
@@ -49,9 +78,36 @@ const ServiceDetail = ({ currentAccount }) => {
   }, [currentAccount, id]);
 
   const handlePurchase = async () => {
+    if (!service || !currentAccount) {
+      setError("Service or account not found!");
+      return;
+    }
+
     try {
-      // Implement purchase logic here
-      console.log("Service purchased!");
+      const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+      const signer = provider.getSigner(currentAccount);
+      const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
+      const tokenContract = new ethers.Contract(TWOERRCOIN_CONTRACT_ADDRESS, twoerrCoinABI.abi, signer);
+
+      const priceInWei = ethers.utils.parseEther(service.price);
+
+      let tx;
+
+      if (useTokens) {
+        const approveTx = await tokenContract.approve(TWOERR_CONTRACT_ADDRESS, priceInWei);
+        await approveTx.wait();
+        tx = await twoerrContract.placeOrder(service.id, true);
+      } else {
+        tx = await twoerrContract.placeOrder(service.id, false, { value: priceInWei });
+      }
+
+      await tx.wait();
+      setSuccess("Service purchased successfully!");
+
+      // Redirect user to home page after a short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (err) {
       console.error("Error purchasing service:", err);
       setError("Failed to purchase service. Please try again.");
@@ -62,81 +118,125 @@ const ServiceDetail = ({ currentAccount }) => {
   if (error) return <p>{error}</p>;
 
   return (
-    <Layout>
-      <div style={{
-        padding: "40px", 
-        maxWidth: "1000px", 
-        minHeight: "300px", 
-        margin: "40px auto", 
-        backgroundColor: "#f5f5f5",
-        borderRadius: "12px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-        position: "relative"
-      }}>
-        <div style={{ width: "75%", paddingRight: "20px" }}> 
-          <h1 style={{
-            fontSize: "32px", 
-            fontWeight: "700",
-            marginBottom: "20px",
-            color: "#2d2d2d"
-          }}>
-            {service.title}
-          </h1>
-          <p style={{
-            fontSize: "18px", 
-            lineHeight: "1.7", 
-            color: "#555",
-            marginBottom: "30px" 
-          }}>
-            {service.description}
-          </p>
-        </div>
+      <Layout>
+        <div style={styles.container}>
+          <div style={styles.leftSection}>
+            <h1 style={styles.title}>{service.title}</h1>
+            <p style={styles.description}>{service.description}</p>
 
-        <div style={{
-          position: "absolute",
-          right: "40px", 
-          top: "40px", 
-          textAlign: "right"
-        }}>
-          <div style={{ marginBottom: "20px" }}>
-            <p style={{
-              fontSize: "24px",
-              fontWeight: "600",
-              color: "#2d2d2d",
-              margin: "0"
-            }}>
-              {service.price} ETH
-            </p>
-            <p style={{
-              color: service.isActive ? "#4CAF50" : "#f44336",
-              margin: "5px 0 0 0"
-            }}>
-              {service.isActive ? "🟢 Active" : "🔴 Inactive"}
-            </p>
+            {/* Display Provider Details */}
+            <div style={styles.providerBox}>
+              <h3>Provider Information</h3>
+              <p><strong>Name:</strong> {providerInfo.name || "Not available"}</p>
+              <p><strong>Contact Info:</strong> {providerInfo.contactInfo || "Not available"}</p>
+            </div>
           </div>
 
-          {isClient && (
-            <button onClick={handlePurchase} style={{
-              padding: "12px 25px",
-              backgroundColor: "#2196F3",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "500",
-              transition: "background-color 0.3s",
-              ":hover": {
-                backgroundColor: "#1976D2"
-              }
-            }}>
-              Purchase Service
-            </button>
-          )}
+          <div style={styles.rightSection}>
+            <div style={styles.priceBox}>
+              <p style={styles.price}>{service.price} ETH</p>
+              <p style={{ color: service.isActive ? "#4CAF50" : "#f44336" }}>
+                {service.isActive ? "🟢 Active" : "🔴 Inactive"}
+              </p>
+            </div>
+
+            {/* Payment Options (Visible to Clients Only) */}
+            {isClient && (
+                <div style={styles.paymentBox}>
+                  <h3>Select Payment Method</h3>
+                  <label style={styles.radioOption}>
+                    <input type="radio" name="paymentMethod" value="ETH" checked={!useTokens} onChange={() => setUseTokens(false)} />
+                    Pay with ETH
+                  </label>
+                  <label style={styles.radioOption}>
+                    <input type="radio" name="paymentMethod" value="Tokens" checked={useTokens} onChange={() => setUseTokens(true)} />
+                    Pay with Tokens
+                  </label>
+                </div>
+            )}
+
+            {/* Add space between payment selection and button */}
+            {isClient && <div style={{ marginBottom: "20px" }}></div>}
+
+            {/* Purchase Button (Only Clients Can See) */}
+            {isClient && (
+                <button onClick={handlePurchase} style={styles.purchaseButton}>
+                  Purchase Service
+                </button>
+            )}
+
+            {success && <p style={{ color: "green" }}>{success}</p>}
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
   );
 };
 
 export default ServiceDetail;
+
+// Styles
+const styles = {
+  container: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "40px",
+    maxWidth: "1000px",
+    margin: "40px auto",
+    backgroundColor: "#f5f5f5",
+    borderRadius: "12px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  },
+  leftSection: {
+    width: "60%",
+    paddingRight: "20px",
+  },
+  rightSection: {
+    width: "35%",
+    textAlign: "right",
+  },
+  title: {
+    fontSize: "32px",
+    fontWeight: "700",
+    marginBottom: "20px",
+    color: "#2d2d2d",
+  },
+  description: {
+    fontSize: "18px",
+    lineHeight: "1.7",
+    color: "#555",
+    marginBottom: "30px",
+  },
+  providerBox: {
+    marginTop: "20px",
+    padding: "15px",
+    backgroundColor: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  priceBox: {
+    marginBottom: "20px",
+  },
+  price: {
+    fontSize: "24px",
+    fontWeight: "600",
+    color: "#2d2d2d",
+  },
+  paymentBox: {
+    marginBottom: "20px",
+    textAlign: "left",
+  },
+  radioOption: {
+    display: "block",
+    marginBottom: "10px",
+  },
+  purchaseButton: {
+    padding: "12px 25px",
+    backgroundColor: "#2196F3",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "500",
+  },
+};
