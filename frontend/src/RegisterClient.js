@@ -30,16 +30,12 @@ const RegisterClient = ({ currentAccount }) => {
       const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
       const signer = provider.getSigner(currentAccount);
 
-      // Creează o instanță a contractului Twoerr
       const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
 
-      // Obține adresa contractului Client din Twoerr
       const clientContractAddress = await twoerrContract.clientContract();
 
-      // Creează o instanță a contractului Client folosind adresa obținută
       const clientContract = new ethers.Contract(clientContractAddress, clientABI.abi, signer);
 
-      // Check if already registered as a provider
       const providerInfo = await new ethers.Contract(PROVIDER_CONTRACT_ADDRESS, providerABI.abi, signer).providers(await signer.getAddress());
       if (providerInfo[0].length > 0) {
         setError("You are already registered as a provider.");

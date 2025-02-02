@@ -32,6 +32,7 @@ const ServicesPage = () => {
           description: service[1],
           price: ethers.utils.formatEther(service[2]),
           isActive: service[3],
+          providerAddress: service[5]
         });
       }
 
