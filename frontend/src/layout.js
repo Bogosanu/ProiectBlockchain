@@ -11,6 +11,9 @@ const Layout = ({ children }) => {
         <Link to="/register">
           <button style={styles.joinButton}>Join us</button>
         </Link>
+        <Link to="/ClientOrders">
+          <button style={styles.joinButton}>My Orders</button>
+        </Link>
       </header>
       <main style={styles.main}>
         {children}

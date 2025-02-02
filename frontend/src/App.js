@@ -15,6 +15,7 @@ import ServicePage from "./Service";
 import ServicesPage from "./Services";
 import { useParams } from "react-router-dom";
 import ServiceDetail from "./ServiceDetail";
+import ClientOrders from "./ClientOrders";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
@@ -214,6 +215,7 @@ const App = () => {
         <Route path="/Service" element={<ServicePage currentAccount={currentAccount} />} />
         <Route path="/Services" element={<ServicesPage currentAccount={currentAccount} />} />
         <Route path="/ServiceDetail/:id" element={<ServiceDetail currentAccount={currentAccount} />} />
+        <Route path="/ClientOrders" element={<ClientOrders currentAccount={currentAccount} />} />
       </Routes>
     </Router>
   );
