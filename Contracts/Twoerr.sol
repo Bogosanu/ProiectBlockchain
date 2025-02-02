@@ -46,6 +46,7 @@ contract Twoerr {
     event OrderCompleted(uint id);
     event ReviewLeft(uint orderId, uint rating, string comment);
     event ServiceStatusToggled(uint id, bool isActive); // New event
+    event OrderNotification(address provider, string title);
 
     constructor(address _provider, address _client, address _token) {
         providerContract = Provider(_provider);
@@ -100,6 +101,7 @@ contract Twoerr {
             isCompleted: false,
             paidInTokens: payInTokens
         });
+        emit OrderNotification(service.provider,service.title);
         emit OrderPlaced(orderCounter, _serviceId, msg.sender, service.price, payInTokens);
     }
 

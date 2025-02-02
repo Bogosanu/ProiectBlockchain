@@ -36,12 +36,21 @@ async function deploy() {
     const twoerrReceipt = await twoerr.deployTransaction.wait();
     console.log(`Twoerr contract deployed at: ${twoerr.address} (Gas used: ${twoerrReceipt.gasUsed})`);
 
+
+    
+    const conv = await ethers.getContractFactory("PriceConverter");
+    const converter = await conv.deploy(accounts[19].address);
+    await converter.deployed();
+    const converterReceipt = await twoerr.deployTransaction.wait();
+    console.log(`Price converter contract deployed at: ${conv.address} (Gas used: ${converterReceipt.gasUsed})`);
+
     // Save deployed contract addresses to frontend
     const addresses = {
         Provider: provider.address,
         Client: client.address,
         Twoerr: twoerr.address,
         TwoerrCoin: twoerrcoin.address,
+        Converter : converter.address,
     };
 
     const outputFilePath = path.join(__dirname, "../frontend/src/jsons/deployedAddresses.json");
