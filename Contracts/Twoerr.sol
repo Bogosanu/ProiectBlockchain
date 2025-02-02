@@ -45,6 +45,7 @@ contract Twoerr {
     event OrderPlaced(uint id, uint serviceId, address client, uint amount, bool paidInTokens);
     event OrderCompleted(uint id);
     event ReviewLeft(uint orderId, uint rating, string comment);
+    event ServiceStatusToggled(uint id, bool isActive); // New event
 
     constructor(address _provider, address _client, address _token) {
         providerContract = Provider(_provider);
@@ -70,6 +71,13 @@ contract Twoerr {
         });
         providerContract.createService(msg.sender, serviceCounter);
         emit ServiceCreated(serviceCounter, msg.sender, _title, _price);
+    }
+
+    function toggleServiceStatus(uint _id) external {
+        Service storage service = services[_id];
+        require(msg.sender == service.provider, "Only the provider can toggle service status");
+        service.isActive = !service.isActive;
+        emit ServiceStatusToggled(_id, service.isActive);
     }
 
     function placeOrder(uint _serviceId, bool payInTokens) external payable {

@@ -3,41 +3,32 @@ import { ethers } from "ethers";
 import twoerrABI from "./jsons/Twoerr.json";
 import addresses from "./jsons/deployedAddresses.json";
 import Layout from './layout';
-import { useNavigate } from "react-router-dom";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
 
-const OrdersPage = ({ currentAccount }) => {
+const ProviderOrders = ({ currentAccount }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    if (!currentAccount) return; // Wait until currentAccount is available
-
-    const fetchOrders = async () => {
+    const fetchProviderOrders = async () => {
       try {
-        console.log("Fetching orders for:", currentAccount); // Debugging
-
         const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
         const signer = provider.getSigner(currentAccount);
         const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
 
-        const orderCounter = await twoerrContract.orderCounter();
-        console.log("Total Orders:", orderCounter.toString()); // Debugging
+        const orderCount = await twoerrContract.orderCounter();
+        const providerOrders = [];
 
-        const ordersList = [];
-
-        for (let i = 1; i <= orderCounter; i++) {
+        for (let i = 1; i <= orderCount; i++) {
           const order = await twoerrContract.GetOrder(i);
           const fullOrder = await twoerrContract.orders(i);
 
-          console.log("Order:", fullOrder); // Debugging
-
-          if (fullOrder.client.toLowerCase() === currentAccount.toLowerCase()) {
-            ordersList.push({
+          if (fullOrder.provider === currentAccount) {
+            providerOrders.push({
               title: order[0],
               price: ethers.utils.formatEther(order[1]),
               isCompleted: order[2],
@@ -46,17 +37,40 @@ const OrdersPage = ({ currentAccount }) => {
           }
         }
 
-        setOrders(ordersList);
+        setOrders(providerOrders);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching orders:", err);
+        console.error("Error fetching provider orders:", err);
         setError("Failed to fetch orders. Please try again.");
         setLoading(false);
       }
     };
 
-    fetchOrders();
-  }, [currentAccount]); // Depend on currentAccount
+    if (currentAccount) {
+      fetchProviderOrders();
+    }
+  }, [currentAccount]);
+
+  const handleCompleteOrder = async (orderId) => {
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+      const signer = provider.getSigner(currentAccount);
+      const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
+
+      const tx = await twoerrContract.completeOrder(orderId);
+      await tx.wait();
+
+      // Update the order status in the frontend
+      setOrders(orders.map(order =>
+          order.id === orderId ? { ...order, isCompleted: true } : order
+      ));
+
+      setSuccess(`Order ${orderId} marked as completed.`);
+    } catch (err) {
+      console.error("Error completing order:", err);
+      setError("Failed to complete the order. Please try again.");
+    }
+  };
 
   const styles = {
     container: {
@@ -75,6 +89,7 @@ const OrdersPage = ({ currentAccount }) => {
       border: "1px solid #cccccc",
       borderRadius: "10px",
       padding: "20px",
+      cursor: "pointer",
       transition: "transform 0.2s ease",
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     },
@@ -91,20 +106,36 @@ const OrdersPage = ({ currentAccount }) => {
     status: {
       fontWeight: "bold",
       marginTop: "10px",
-    }
+    },
+    button: {
+      backgroundColor: "#28a745",
+      color: "#ffffff",
+      padding: "8px 12px",
+      border: "none",
+      borderRadius: "5px",
+      fontSize: "14px",
+      cursor: "pointer",
+      marginTop: "10px",
+      transition: "background-color 0.3s ease",
+    },
+    buttonDisabled: {
+      backgroundColor: "#cccccc",
+      cursor: "not-allowed",
+    },
   };
 
   return (
       <Layout>
         <div style={styles.container}>
           <h1 style={{ textAlign: "center", marginBottom: "20px", color: "#333333" }}>
-            My Orders (Client)
+            My Orders (Provider)
           </h1>
+
+          {success && <p style={{ textAlign: "center", color: "green" }}>{success}</p>}
+          {error && <p style={{ textAlign: "center", color: "red" }}>{error}</p>}
 
           {loading ? (
               <p style={{ textAlign: "center" }}>Loading orders...</p>
-          ) : error ? (
-              <p style={{ textAlign: "center", color: "#ff0000" }}>{error}</p>
           ) : orders.length === 0 ? (
               <p style={{ textAlign: "center" }}>No orders found.</p>
           ) : (
@@ -125,6 +156,14 @@ const OrdersPage = ({ currentAccount }) => {
                       }}>
                         Status: {order.isCompleted ? "Completed" : "Pending"}
                       </p>
+                      {!order.isCompleted && (
+                          <button
+                              style={styles.button}
+                              onClick={() => handleCompleteOrder(order.id)}
+                          >
+                            Mark as Completed
+                          </button>
+                      )}
                     </div>
                 ))}
               </div>
@@ -134,4 +173,4 @@ const OrdersPage = ({ currentAccount }) => {
   );
 };
 
-export default OrdersPage;
+export default ProviderOrders;

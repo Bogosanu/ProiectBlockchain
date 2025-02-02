@@ -15,6 +15,7 @@ import ServicePage from "./Service";
 import ServicesPage from "./Services";
 import ServiceDetail from "./ServiceDetail";
 import ClientOrders from "./ClientOrders";
+import ProviderOrders from "./ProviderOrders";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
@@ -119,7 +120,7 @@ const App = () => {
           <Route
               path="/"
               element={
-                <Layout>
+                <Layout isProvider={isProvider}>
                   <div style={{ padding: "20px", backgroundColor: "#f5f5f5", minHeight: "100vh", textAlign: "center" }}>
                     {currentAccount ? (
                         <div style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", maxWidth: "600px", margin: "0 auto" }}>
@@ -159,6 +160,7 @@ const App = () => {
         <Route path="/Services" element={<ServicesPage currentAccount={currentAccount} />} />
         <Route path="/ServiceDetail/:id" element={<ServiceDetail currentAccount={currentAccount} />} />
         <Route path="/ClientOrders" element={<ClientOrders currentAccount={currentAccount} />} />
+        <Route path="/ProviderOrders" element={<ProviderOrders currentAccount={currentAccount} />} />
       </Routes>
     </Router>
   );

@@ -19,6 +19,7 @@ const ServiceDetail = ({ currentAccount }) => {
   const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [isClient, setIsClient] = useState(false);
+  const [isProvider, setIsProvider] = useState(false);
   const [providerInfo, setProviderInfo] = useState({ name: "", contactInfo: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,6 +66,9 @@ const ServiceDetail = ({ currentAccount }) => {
         // Check if user is a client
         const clientInfo = await clientContract.clients(currentAccount);
         setIsClient(clientInfo && clientInfo[0].length > 0);
+
+        // Check if user is the provider
+        setIsProvider(providerAddress === currentAccount);
 
         setLoading(false);
       } catch (err) {
@@ -114,61 +118,89 @@ const ServiceDetail = ({ currentAccount }) => {
     }
   };
 
+  const toggleServiceStatus = async () => {
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+      const signer = provider.getSigner(currentAccount);
+      const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
+
+      const tx = await twoerrContract.toggleServiceStatus(service.id);
+      await tx.wait();
+
+      setService(prevService => ({
+        ...prevService,
+        isActive: !prevService.isActive,
+      }));
+
+      setSuccess(`Service is now ${!service.isActive ? "active" : "inactive"}.`);
+    } catch (err) {
+      console.error("Error toggling service status:", err);
+      setError("Failed to toggle service status. Please try again.");
+    }
+  };
+
   if (loading) return <p>Loading service details...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-      <Layout>
-        <div style={styles.container}>
-          <div style={styles.leftSection}>
-            <h1 style={styles.title}>{service.title}</h1>
-            <p style={styles.description}>{service.description}</p>
+    <Layout>
+      <div style={styles.container}>
+        <div style={styles.leftSection}>
+          <h1 style={styles.title}>{service.title}</h1>
+          <p style={styles.description}>{service.description}</p>
 
-            {/* Display Provider Details */}
-            <div style={styles.providerBox}>
-              <h3>Provider Information</h3>
-              <p><strong>Name:</strong> {providerInfo.name || "Not available"}</p>
-              <p><strong>Contact Info:</strong> {providerInfo.contactInfo || "Not available"}</p>
-            </div>
-          </div>
-
-          <div style={styles.rightSection}>
-            <div style={styles.priceBox}>
-              <p style={styles.price}>{service.price} ETH</p>
-              <p style={{ color: service.isActive ? "#4CAF50" : "#f44336" }}>
-                {service.isActive ? "🟢 Active" : "🔴 Inactive"}
-              </p>
-            </div>
-
-            {/* Payment Options (Visible to Clients Only) */}
-            {isClient && (
-                <div style={styles.paymentBox}>
-                  <h3>Select Payment Method</h3>
-                  <label style={styles.radioOption}>
-                    <input type="radio" name="paymentMethod" value="ETH" checked={!useTokens} onChange={() => setUseTokens(false)} />
-                    Pay with ETH
-                  </label>
-                  <label style={styles.radioOption}>
-                    <input type="radio" name="paymentMethod" value="Tokens" checked={useTokens} onChange={() => setUseTokens(true)} />
-                    Pay with Tokens
-                  </label>
-                </div>
-            )}
-
-            {/* Add space between payment selection and button */}
-            {isClient && <div style={{ marginBottom: "20px" }}></div>}
-
-            {/* Purchase Button (Only Clients Can See) */}
-            {isClient && (
-                <button onClick={handlePurchase} style={styles.purchaseButton}>
-                  Purchase Service
-                </button>
-            )}
-
-            {success && <p style={{ color: "green" }}>{success}</p>}
+          {/* Display Provider Details */}
+          <div style={styles.providerBox}>
+            <h3>Provider Information</h3>
+            <p><strong>Name:</strong> {providerInfo.name || "Not available"}</p>
+            <p><strong>Contact Info:</strong> {providerInfo.contactInfo || "Not available"}</p>
           </div>
         </div>
-      </Layout>
+
+        <div style={styles.rightSection}>
+          <div style={styles.priceBox}>
+            <p style={styles.price}>{service.price} ETH</p>
+            <p style={{ color: service.isActive ? "#4CAF50" : "#f44336" }}>
+              {service.isActive ? "🟢 Active" : "🔴 Inactive"}
+            </p>
+          </div>
+
+          {/* Toggle Button for Providers */}
+          {isProvider && (
+            <button onClick={toggleServiceStatus} style={styles.toggleButton}>
+              {service.isActive ? "Deactivate Service" : "Activate Service"}
+            </button>
+          )}
+
+          {/* Payment Options (Visible to Clients Only) */}
+          {isClient && service.isActive && (
+            <div style={styles.paymentBox}>
+              <h3>Select Payment Method</h3>
+              <label style={styles.radioOption}>
+                <input type="radio" name="paymentMethod" value="ETH" checked={!useTokens} onChange={() => setUseTokens(false)} />
+                Pay with ETH
+              </label>
+              <label style={styles.radioOption}>
+                <input type="radio" name="paymentMethod" value="Tokens" checked={useTokens} onChange={() => setUseTokens(true)} />
+                Pay with Tokens
+              </label>
+            </div>
+          )}
+
+          {/* Add space between payment selection and button */}
+          {isClient && service.isActive && <div style={{ marginBottom: "20px" }}></div>}
+
+          {/* Purchase Button (Only Clients Can See) */}
+          {isClient && service.isActive && (
+            <button onClick={handlePurchase} style={styles.purchaseButton}>
+              Purchase Service
+            </button>
+          )}
+
+          {success && <p style={{ color: "green" }}>{success}</p>}
+        </div>
+      </div>
+    </Layout>
   );
 };
 
@@ -238,5 +270,16 @@ const styles = {
     cursor: "pointer",
     fontSize: "16px",
     fontWeight: "500",
+  },
+  toggleButton: {
+    padding: "12px 25px",
+    backgroundColor: "#FF9800",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "500",
+    marginBottom: "20px",
   },
 };

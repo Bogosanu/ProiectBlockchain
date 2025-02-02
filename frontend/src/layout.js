@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Layout = ({ children }) => {
+const Layout = ({ children, isProvider }) => {
   return (
     <div>
       <header style={styles.header}>
@@ -11,7 +11,7 @@ const Layout = ({ children }) => {
         <Link to="/register">
           <button style={styles.joinButton}>Join us</button>
         </Link>
-        <Link to="/ClientOrders">
+        <Link to={isProvider ? "/ProviderOrders" : "/ClientOrders"}>
           <button style={styles.joinButton}>My Orders</button>
         </Link>
       </header>
