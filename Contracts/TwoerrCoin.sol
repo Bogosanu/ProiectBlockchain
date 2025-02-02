@@ -6,9 +6,15 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract TwoerrCoin is ERC20 {
     address public owner;
 
-    constructor() ERC20("TwoerrCoin", "FVC") {
+    constructor(address[] memory initialHolders) ERC20("TwoerrCoin", "TWC") {
         owner = msg.sender;
-        _mint(msg.sender, 1000000 * 10**decimals()); // Mint 1 million tokens to the owner
+
+        uint256 initialSupply = 10000 * 10**decimals();
+        uint256 amountPerHolder = initialSupply / initialHolders.length;
+
+        for (uint i = 0; i < initialHolders.length; i++) {
+            _mint(initialHolders[i], amountPerHolder);
+        }
     }
 
     function mint(address to, uint256 amount) external {

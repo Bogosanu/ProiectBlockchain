@@ -38,7 +38,7 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\Twoerr.sol": {
-      "lastModificationDate": 1738514875565,
+      "lastModificationDate": 1738518590142,
       "contentHash": "239152c5673628292dc6ab87a26a359b",
       "sourceName": "Contracts/Twoerr.sol",
       "solcConfig": {
@@ -264,8 +264,8 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\TwoerrCoin.sol": {
-      "lastModificationDate": 1738441764293,
-      "contentHash": "4639ed78d7c8c1aa970c54b5e71a6aa7",
+      "lastModificationDate": 1738519578706,
+      "contentHash": "23a4fba8c147fce00fbffcac0f57e272",
       "sourceName": "Contracts/TwoerrCoin.sol",
       "solcConfig": {
         "version": "0.8.28",

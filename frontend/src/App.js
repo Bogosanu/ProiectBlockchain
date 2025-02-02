@@ -57,6 +57,11 @@ const App = () => {
         if (selectedAccount) {
           const balanceWei = await provider.getBalance(selectedAccount);
           setEthBalance(ethers.utils.formatEther(balanceWei));
+
+          const signer = provider.getSigner(selectedAccount);
+          const tokenContract = new ethers.Contract(TWOERRCOIN_CONTRACT_ADDRESS, twoerrCoinABI.abi, signer);
+          const tokenBalanceWei = await tokenContract.balanceOf(selectedAccount);
+          setTokenBalance(ethers.utils.formatEther(tokenBalanceWei));
         }
       } catch (error) {
         console.error("Error connecting to blockchain:", error);
