@@ -19,6 +19,8 @@ const ServiceDetail = ({ currentAccount }) => {
   const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [isClient, setIsClient] = useState(false);
+  const [isProvider, setIsProvider] = useState(false); // General provider role
+  const [isOwningProvider, setIsOwningProvider] = useState(false); // Is this provider the owner of this service?
   const [providerInfo, setProviderInfo] = useState({ name: "", contactInfo: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,6 +29,7 @@ const ServiceDetail = ({ currentAccount }) => {
 
   useEffect(() => {
     if (!currentAccount) return;
+
     const fetchServiceDetails = async () => {
       try {
         console.log("Current Account:", currentAccount);
@@ -65,6 +68,13 @@ const ServiceDetail = ({ currentAccount }) => {
         // Check if user is a client
         const clientInfo = await clientContract.clients(currentAccount);
         setIsClient(clientInfo && clientInfo[0].length > 0);
+
+        // Check if user is a provider (general)
+        const providerInfo = await providerContract.providers(currentAccount);
+        setIsProvider(providerInfo && providerInfo[0].length > 0);
+
+        // Check if user is the **specific provider** for this service
+        setIsOwningProvider(providerAddress === currentAccount);
 
         setLoading(false);
       } catch (err) {
@@ -114,11 +124,32 @@ const ServiceDetail = ({ currentAccount }) => {
     }
   };
 
+  const toggleServiceStatus = async () => {
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+      const signer = provider.getSigner(currentAccount);
+      const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
+
+      const tx = await twoerrContract.toggleServiceStatus(service.id);
+      await tx.wait();
+
+      setService(prevService => ({
+        ...prevService,
+        isActive: !prevService.isActive,
+      }));
+
+      setSuccess(`Service is now ${!service.isActive ? "active" : "inactive"}.`);
+    } catch (err) {
+      console.error("Error toggling service status:", err);
+      setError("Failed to toggle service status. Please try again.");
+    }
+  };
+
   if (loading) return <p>Loading service details...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-      <Layout>
+      <Layout isProvider={isProvider}> {/* ✅ Pass isProvider to Layout */}
         <div style={styles.container}>
           <div style={styles.leftSection}>
             <h1 style={styles.title}>{service.title}</h1>
@@ -140,8 +171,15 @@ const ServiceDetail = ({ currentAccount }) => {
               </p>
             </div>
 
+            {/* Toggle Button for Owning Providers */}
+            {isOwningProvider && (
+                <button onClick={toggleServiceStatus} style={styles.toggleButton}>
+                  {service.isActive ? "Deactivate Service" : "Activate Service"}
+                </button>
+            )}
+
             {/* Payment Options (Visible to Clients Only) */}
-            {isClient && (
+            {isClient && service.isActive && (
                 <div style={styles.paymentBox}>
                   <h3>Select Payment Method</h3>
                   <label style={styles.radioOption}>
@@ -155,11 +193,7 @@ const ServiceDetail = ({ currentAccount }) => {
                 </div>
             )}
 
-            {/* Add space between payment selection and button */}
-            {isClient && <div style={{ marginBottom: "20px" }}></div>}
-
-            {/* Purchase Button (Only Clients Can See) */}
-            {isClient && (
+            {isClient && service.isActive && (
                 <button onClick={handlePurchase} style={styles.purchaseButton}>
                   Purchase Service
                 </button>
@@ -173,6 +207,7 @@ const ServiceDetail = ({ currentAccount }) => {
 };
 
 export default ServiceDetail;
+
 
 // Styles
 const styles = {
@@ -238,5 +273,16 @@ const styles = {
     cursor: "pointer",
     fontSize: "16px",
     fontWeight: "500",
+  },
+  toggleButton: {
+    padding: "12px 25px",
+    backgroundColor: "#FF9800",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "500",
+    marginBottom: "20px",
   },
 };
