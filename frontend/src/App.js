@@ -148,10 +148,6 @@ const App = () => {
                     ) : (
                         <p>Connecting to local Ethereum network...</p>
                     )}
-                  </div>
-                ) : (
-                  <p>Connecting to local Ethereum network...</p>
-                )}
               </div>
             </Layout>
           }
