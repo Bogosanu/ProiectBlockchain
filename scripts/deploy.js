@@ -43,7 +43,7 @@ async function deploy() {
     console.log(`Addresses saved to ${outputFilePath}`);
 
 
-    const name = "Test Provider";
+    /*const name = "Test Provider";
     const contactInfo = "test@example.com";
     await provider.connect(user1).registerProvider(name, contactInfo);
     console.log("Provider registered by user1");
@@ -63,9 +63,11 @@ async function deploy() {
     console.log("Client Name:", clientInfo.name);
     console.log("Client Email:", clientInfo.contactInfo);
 
+
     await twoerr.connect(user1).createService("Service", "depanari", 50);
     const service = await provider.getProviderServices(user1.address);
     console.log(service);
+     */
 }
 
 deploy()

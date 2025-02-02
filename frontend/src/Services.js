@@ -57,19 +57,23 @@ const ServicesPage = () => {
     },
     grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", // Grid responsive
-      gap: "20px", // Spațiu între butoane
+      gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", // Increased min width
+      gap: "20px",
       padding: "20px",
     },
     button: {
-      backgroundColor: "#ffffff", // Fundal alb
+      backgroundColor: "#ffffff",
       border: "1px solid #cccccc",
       borderRadius: "10px",
       padding: "20px",
       textAlign: "center",
       cursor: "pointer",
       transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Umbra
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      height: "150px", // Fixed height for uniformity
     },
     buttonHover: {
       transform: "scale(1.05)", // Efect de scalare la hover

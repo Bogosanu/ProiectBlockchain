@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import { ethers } from "ethers";
 import twoerrABI from "./jsons/Twoerr.json"; 
 import providerABI from "./jsons/Provider.json"; 
+import clientABI from "./jsons/Client.json"; // Import client ABI
 import addresses from "./jsons/deployedAddresses.json";
 import Layout from './layout';
 import { useNavigate } from "react-router-dom";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr; // Adresa contractului Twoerr
+const PROVIDER_CONTRACT_ADDRESS = addresses.Provider;
+const CLIENT_CONTRACT_ADDRESS = addresses.Client;
 
-const Register = () => {
+const RegisterProvider = ({ currentAccount }) => {
   const [name, setName] = useState("");
   const [contactInfo, setContactInfo] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,18 +28,26 @@ const Register = () => {
 
     try {
       const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
-      const signer = provider.getSigner();
+      const signer = provider.getSigner(currentAccount);
 
       const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
 
       const providerContractAddress = await twoerrContract.providerContract();
 
       const providerContract = new ethers.Contract(providerContractAddress, providerABI.abi, signer);
+      const clientContract = new ethers.Contract(CLIENT_CONTRACT_ADDRESS, clientABI.abi, signer);
+
+      // Check if already registered as a client
+      const clientInfo = await clientContract.clients(await signer.getAddress());
+      if (clientInfo[0].length > 0) {
+        setError("You are already registered as a client.");
+        return;
+      }
 
       const tx = await providerContract.registerProvider(name, contactInfo);
       await tx.wait();
 
-      setSuccess("Client registered successfully!");
+      setSuccess("Provider registered successfully!");
       setName("");
       setContactInfo("");
       
@@ -44,10 +55,9 @@ const Register = () => {
         navigate("/"); 
       }, 2000); 
 
-
     } catch (err) {
-      console.error("Error registering client:", err);
-      setError("Failed to register client. Please try again.");
+      console.error("Error registering provider:", err);
+      setError("Failed to register provider. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +101,7 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterProvider;
 
 const styles = {
   container: {
