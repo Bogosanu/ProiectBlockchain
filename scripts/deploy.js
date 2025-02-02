@@ -8,31 +8,33 @@ async function deploy() {
     const accountAddresses = accounts.map(account => account.address); // Extract addresses
     const owner = accounts[0]; // First account as owner
 
-    console.log("Accounts:", accountAddresses);
-
-    // Deploy Provider Contract
+    // Deploy Provider
     const Provider = await ethers.getContractFactory("Provider");
     const provider = await Provider.deploy(owner.address);
     await provider.deployed();
-    console.log("Provider contract deployed at:", provider.address);
+    const providerReceipt = await provider.deployTransaction.wait();
+    console.log(`Provider contract deployed at: ${provider.address} (Gas used: ${providerReceipt.gasUsed})`);
 
-    // Deploy Client Contract
+    // Deploy Client
     const Client = await ethers.getContractFactory("Client");
     const client = await Client.deploy(owner.address);
     await client.deployed();
-    console.log("Client contract deployed at:", client.address);
+    const clientReceipt = await client.deployTransaction.wait();
+    console.log(`Client contract deployed at: ${client.address} (Gas used: ${clientReceipt.gasUsed})`);
 
-    // Deploy TwoerrCoin and Mint to All Accounts
+    
     const TwoerrCoin = await ethers.getContractFactory("TwoerrCoin");
     const twoerrcoin = await TwoerrCoin.deploy(accountAddresses); // Mint to all accounts
     await twoerrcoin.deployed();
-    console.log("TwoerrCoin contract deployed at:", twoerrcoin.address);
 
-    // Deploy Twoerr Contract
+    const twoerrCoinReceipt = await twoerrcoin.deployTransaction.wait();
+    console.log(`TwoerrCoin contract deployed at: ${twoerrcoin.address} (Gas used: ${twoerrCoinReceipt.gasUsed})`);
+
     const Twoerr = await ethers.getContractFactory("Twoerr");
     const twoerr = await Twoerr.deploy(provider.address, client.address, twoerrcoin.address);
     await twoerr.deployed();
-    console.log("Twoerr contract deployed at:", twoerr.address);
+    const twoerrReceipt = await twoerr.deployTransaction.wait();
+    console.log(`Twoerr contract deployed at: ${twoerr.address} (Gas used: ${twoerrReceipt.gasUsed})`);
 
     // Save deployed contract addresses to frontend
     const addresses = {

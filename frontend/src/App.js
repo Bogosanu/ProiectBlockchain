@@ -14,6 +14,7 @@ import RegisterProvider from "./RegisterProvider";
 import ServicePage from "./Service";
 import ServicesPage from "./Services";
 import ServiceDetail from "./ServiceDetail";
+import ClientOrders from "./ClientOrders";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
@@ -148,17 +149,22 @@ const App = () => {
                         <p>Connecting to local Ethereum network...</p>
                     )}
                   </div>
-                </Layout>
-              }
-          />
-          <Route path="/register" element={<Register currentAccount={currentAccount} />} />
-          <Route path="/RegisterClient" element={<RegisterClient currentAccount={currentAccount} />} />
-          <Route path="/RegisterProvider" element={<RegisterProvider currentAccount={currentAccount} />} />
-          <Route path="/Service" element={<ServicePage currentAccount={currentAccount} />} />
-          <Route path="/Services" element={<ServicesPage currentAccount={currentAccount} />} />
-          <Route path="/ServiceDetail/:id" element={<ServiceDetail currentAccount={currentAccount} />} />
-        </Routes>
-      </Router>
+                ) : (
+                  <p>Connecting to local Ethereum network...</p>
+                )}
+              </div>
+            </Layout>
+          }
+        />
+        <Route path="/register" element={<Register currentAccount={currentAccount} />} />
+        <Route path="/RegisterClient" element={<RegisterClient currentAccount={currentAccount} />} />
+        <Route path="/RegisterProvider" element={<RegisterProvider currentAccount={currentAccount} />} />
+        <Route path="/Service" element={<ServicePage currentAccount={currentAccount} />} />
+        <Route path="/Services" element={<ServicesPage currentAccount={currentAccount} />} />
+        <Route path="/ServiceDetail/:id" element={<ServiceDetail currentAccount={currentAccount} />} />
+        <Route path="/ClientOrders" element={<ClientOrders currentAccount={currentAccount} />} />
+      </Routes>
+    </Router>
   );
 };
 
