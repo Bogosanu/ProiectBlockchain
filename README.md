@@ -47,41 +47,41 @@ https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235ac
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/scripts/deploy.js#L1-L78
 
 ## ${\color{green}Cerințe \space opționale:}$
-1.Utilizare librării 
+1.**Utilizare librării** 
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/Contracts/TwoerrCoin.sol#L4-L6
 
-2.Implementarea de teste (cu tool-uri la alegerea echipelor).
+2.**Implementarea de teste (cu tool-uri la alegerea echipelor).**
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/test/App.test.js#L1-L120
 
-3.Implementarea de standarde ERC.
+3.**Implementarea de standarde ERC.**
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/Contracts/TwoerrCoin.sol#L4-L6
 
-4.Utilizarea de Oracles.
+4.**Utilizarea de Oracles.**
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/Contracts/Conversion.sol#L2-L39
 
 # **Partea 2:** *Interacțiunea cu blockchain printr-o aplicație web3*
 
 ## ${\color{red}Cerințe \space obligatorii:}$
 
-1.Utilizarea unei librării web3 (exemple web3 sau ethersjs) și conectarea cu un
+1.**Utilizarea unei librării web3 (exemple web3 sau ethersjs) și conectarea cu un
 Web3 Provider pentru accesarea unor informații generale despre conturi
-(adresa, balance)
+(adresa, balance)**
 
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/frontend/src/App.js#L2
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/frontend/src/App.js#L22
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/frontend/src/App.js#L44-L45
 
-2.Inițierea tranzacțiilor de transfer sau de apel de funcții, utilizând clase din
-librăriile web3.
+2.**Inițierea tranzacțiilor de transfer sau de apel de funcții, utilizând clase din
+librăriile web3.**
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/frontend/src/RegisterClient.js#L42-L78
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/frontend/src/ServiceDetail.js#L96-L112
 
 ## ${\color{green}Cerințe \space opționale:}$
-1.Tratare events (Observer Pattern).
+1.**Tratare events (Observer Pattern).**
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/frontend/src/App.js#L122-L141
 
-2.Analiza gas-cost (estimare cost și fixare limită de cost).
+2.**Analiza gas-cost (estimare cost și fixare limită de cost).**
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/scripts/deploy.js#L12-L16
 
-3.Control al stării tranzacțiilor (tratare excepții)
+3.**Control al stării tranzacțiilor (tratare excepții)**
 https://github.com/Bogosanu/ProiectBlockchain/blob/e923de75b0627210c770b97c0e7408972fd2628a/Contracts/Twoerr.sol#L114-L119
