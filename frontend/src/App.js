@@ -125,7 +125,6 @@ const App = () => {
     const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, provider);
 
     const handleOrderNotification = (providerAddress, title) => {
-      // Verifică dacă notificarea este pentru providerul curent
       if (providerAddress.toLowerCase() === currentAccount.toLowerCase()) {
         setNotifications((prevNotifications) => [
           ...prevNotifications,
@@ -134,10 +133,8 @@ const App = () => {
       }
     };
 
-    // Ascultă evenimentul OrderNotification
     twoerrContract.on("OrderNotification", handleOrderNotification);
 
-    // Cleanup la unmount
     return () => {
       twoerrContract.off("OrderNotification", handleOrderNotification);
     };
