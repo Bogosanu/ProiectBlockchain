@@ -42,6 +42,7 @@ https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235ac
 
 6.**Ilustrarea interacțiunii dintre smart contracte.**
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/Contracts/Twoerr.sol#L40-L42
+https://github.com/Bogosanu/ProiectBlockchain/blob/aca32de5369af3d0224355ffeb06bf3bed8b11e7/Contracts/Twoerr.sol#L63-L74
 
 7.**Deploy pe o rețea locală sau pe o rețea de test Ethereum.**
 https://github.com/Bogosanu/ProiectBlockchain/blob/32723a4d3d66428947c7261b235acb25d423849a/scripts/deploy.js#L1-L78
