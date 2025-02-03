@@ -10,58 +10,60 @@ const PriceConverter = () => {
   const [amountInUSD, setAmountInUSD] = useState("");
   const [amountInETH, setAmountInETH] = useState("");
   const [convertedAmount, setConvertedAmount] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(""); // Add error message
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const contractAddress = addresses.Converter;
 
   const convertFromUSD = async () => {
-    try {
-      console.log("Connecting to contract...");
-      const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
-      const contract = new ethers.Contract(contractAddress, conversionABI.abi, provider); // No signer needed
+    setErrorMessage("");
+    setConvertedAmount(null);
+    setLoading(true);
 
-      console.log("Fetching conversion rate for USD:", amountInUSD);
-      if (!amountInUSD || isNaN(amountInUSD) || Number(amountInUSD) <= 0) {
-        setErrorMessage("Invalid USD amount entered");
-        return;
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+      const contract = new ethers.Contract(contractAddress, conversionABI.abi, provider);
+
+      if (!amountInUSD || isNaN(parseFloat(amountInUSD)) || parseFloat(amountInUSD) <= 0) {
+        throw new Error("Invalid USD amount entered. Enter a valid number.");
       }
 
-      const amount = ethers.BigNumber.from(amountInUSD); // ✅ Convert USD as BigNumber (no decimals)
-      console.log("Parsed Amount (USD):", amount.toString());
+      const amount = ethers.utils.parseUnits(amountInUSD, 8);
 
       const result = await contract.getConversionRateFromUSD(amount);
-      console.log("Conversion Result (ETH):", result.toString());
 
-      setConvertedAmount(ethers.utils.formatEther(result)); // ✅ Properly format ETH
-      setErrorMessage(""); // Clear errors
+      setConvertedAmount(ethers.utils.formatUnits(result, 8));
     } catch (error) {
       console.error("Error while converting from USD:", error);
-      setErrorMessage("Conversion failed. Ensure contract is deployed.");
+      setErrorMessage(error.message || "Conversion failed. Ensure contract is deployed.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const convertToUSD = async () => {
+    setErrorMessage("");
+    setConvertedAmount(null);
+    setLoading(true);
+
     try {
       const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
-      const contract = new ethers.Contract(contractAddress, conversionABI.abi, provider); // No signer needed
+      const contract = new ethers.Contract(contractAddress, conversionABI.abi, provider);
 
-      console.log("Fetching conversion rate for ETH:", amountInETH);
-      if (!amountInETH || isNaN(amountInETH) || Number(amountInETH) <= 0) {
-        setErrorMessage("Invalid ETH amount entered");
-        return;
+      if (!amountInETH || isNaN(parseFloat(amountInETH)) || parseFloat(amountInETH) <= 0) {
+        throw new Error("Invalid ETH amount entered. Enter a valid number.");
       }
 
-      const amount = ethers.utils.parseEther(amountInETH); // ✅ ETH uses 18 decimals
-      console.log("Parsed Amount (ETH in Wei):", amount.toString());
+      const amount = ethers.utils.parseEther(amountInETH);
 
       const result = await contract.getConversionRateToUSD(amount);
-      console.log("Conversion Result (USD):", result.toString());
 
-      setConvertedAmount(ethers.utils.formatUnits(result, 2)); // ✅ Format to 2 decimals for USD
-      setErrorMessage(""); // Clear errors
+      setConvertedAmount(ethers.utils.formatUnits(result, 18));
     } catch (error) {
       console.error("Error while converting to USD:", error);
-      setErrorMessage("Conversion failed. Ensure contract is deployed.");
+      setErrorMessage(error.message || "Conversion failed. Ensure contract is deployed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,7 +72,7 @@ const PriceConverter = () => {
         <div style={styles.container}>
           <h1>Price Converter</h1>
 
-          {errorMessage && <p style={styles.error}>{errorMessage}</p>} {/* Show error messages */}
+          {errorMessage && <p style={styles.error}>{errorMessage}</p>}
 
           <div style={styles.inputGroup}>
             <label>Amount in USD:</label>
@@ -79,9 +81,10 @@ const PriceConverter = () => {
                 value={amountInUSD}
                 onChange={(e) => setAmountInUSD(e.target.value)}
                 style={styles.input}
+                min="0"
             />
-            <button onClick={convertFromUSD} style={styles.button}>
-              Convert to ETH
+            <button onClick={convertFromUSD} style={styles.button} disabled={loading}>
+              {loading ? "Converting..." : "Convert to ETH"}
             </button>
           </div>
 
@@ -92,9 +95,10 @@ const PriceConverter = () => {
                 value={amountInETH}
                 onChange={(e) => setAmountInETH(e.target.value)}
                 style={styles.input}
+                min="0"
             />
-            <button onClick={convertToUSD} style={styles.button}>
-              Convert to USD
+            <button onClick={convertToUSD} style={styles.button} disabled={loading}>
+              {loading ? "Converting..." : "Convert to USD"}
             </button>
           </div>
 

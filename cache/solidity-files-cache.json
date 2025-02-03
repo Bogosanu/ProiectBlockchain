@@ -302,8 +302,8 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\Conversion.sol": {
-      "lastModificationDate": 1738533517180,
-      "contentHash": "8e81d00087fd70fe568bcf5931a6512e",
+      "lastModificationDate": 1738572818447,
+      "contentHash": "a67a24880935c52fbd86b05d8b5fff38",
       "sourceName": "Contracts/Conversion.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -330,7 +330,6 @@
         }
       },
       "imports": [
-        "hardhat/console.sol",
         "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol"
       ],
       "versionPragmas": [
