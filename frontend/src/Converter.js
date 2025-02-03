@@ -1,19 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import conversionABI from "./jsons/PriceConverter.json";
+import providerABI from "./jsons/Provider.json"; // Import Provider ABI
 import Layout from "./layout";
 import addresses from "./jsons/deployedAddresses.json";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 
-const PriceConverter = () => {
+const PriceConverter = ({ currentAccount }) => {
   const [amountInUSD, setAmountInUSD] = useState("");
   const [amountInETH, setAmountInETH] = useState("");
   const [convertedAmount, setConvertedAmount] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isProvider, setIsProvider] = useState(false); // Track provider role
 
   const contractAddress = addresses.Converter;
+  const providerContractAddress = addresses.Provider;
+
+  useEffect(() => {
+    const checkIfProvider = async () => {
+      if (!currentAccount) return;
+      try {
+        const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+        const signer = provider.getSigner();
+        const providerContract = new ethers.Contract(providerContractAddress, providerABI.abi, signer);
+
+        const providerInfo = await providerContract.providers(currentAccount);
+        setIsProvider(providerInfo && providerInfo[0].length > 0);
+      } catch (error) {
+        console.error("Error checking provider status:", error);
+      }
+    };
+
+    checkIfProvider();
+  }, [currentAccount]);
 
   const convertFromUSD = async () => {
     setErrorMessage("");
@@ -29,9 +50,7 @@ const PriceConverter = () => {
       }
 
       const amount = ethers.utils.parseUnits(amountInUSD, 8);
-
       const result = await contract.getConversionRateFromUSD(amount);
-
       setConvertedAmount(ethers.utils.formatUnits(result, 8));
     } catch (error) {
       console.error("Error while converting from USD:", error);
@@ -55,9 +74,7 @@ const PriceConverter = () => {
       }
 
       const amount = ethers.utils.parseEther(amountInETH);
-
       const result = await contract.getConversionRateToUSD(amount);
-
       setConvertedAmount(ethers.utils.formatUnits(result, 18));
     } catch (error) {
       console.error("Error while converting to USD:", error);
@@ -68,7 +85,7 @@ const PriceConverter = () => {
   };
 
   return (
-      <Layout>
+      <Layout isProvider={isProvider}>
         <div style={styles.container}>
           <h1>Price Converter</h1>
 

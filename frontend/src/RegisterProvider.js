@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import twoerrABI from "./jsons/Twoerr.json"; 
-import providerABI from "./jsons/Provider.json"; 
-import clientABI from "./jsons/Client.json"; // Import client ABI
+import twoerrABI from "./jsons/Twoerr.json";
+import providerABI from "./jsons/Provider.json";
+import clientABI from "./jsons/Client.json";
 import addresses from "./jsons/deployedAddresses.json";
 import Layout from './layout';
 import { useNavigate } from "react-router-dom";
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
-const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr; // Adresa contractului Twoerr
+const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
 const PROVIDER_CONTRACT_ADDRESS = addresses.Provider;
 const CLIENT_CONTRACT_ADDRESS = addresses.Client;
 
@@ -18,7 +18,26 @@ const RegisterProvider = ({ currentAccount }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isProvider, setIsProvider] = useState(false); // Track provider role
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkIfProvider = async () => {
+      if (!currentAccount) return;
+      try {
+        const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
+        const signer = provider.getSigner();
+        const providerContract = new ethers.Contract(PROVIDER_CONTRACT_ADDRESS, providerABI.abi, signer);
+
+        const providerInfo = await providerContract.providers(currentAccount);
+        setIsProvider(providerInfo && providerInfo[0].length > 0);
+      } catch (error) {
+        console.error("Error checking provider status:", error);
+      }
+    };
+
+    checkIfProvider();
+  }, [currentAccount]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -29,11 +48,8 @@ const RegisterProvider = ({ currentAccount }) => {
     try {
       const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
       const signer = provider.getSigner(currentAccount);
-
       const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
-
       const providerContractAddress = await twoerrContract.providerContract();
-
       const providerContract = new ethers.Contract(providerContractAddress, providerABI.abi, signer);
       const clientContract = new ethers.Contract(CLIENT_CONTRACT_ADDRESS, clientABI.abi, signer);
 
@@ -50,10 +66,10 @@ const RegisterProvider = ({ currentAccount }) => {
       setSuccess("Provider registered successfully!");
       setName("");
       setContactInfo("");
-      
+
       setTimeout(() => {
-        navigate("/"); 
-      }, 2000); 
+        navigate("/");
+      }, 2000);
 
     } catch (err) {
       console.error("Error registering provider:", err);
@@ -64,45 +80,46 @@ const RegisterProvider = ({ currentAccount }) => {
   };
 
   return (
-    <Layout>
-      <div style={styles.container}>
-        <div style={styles.box}>
-          <h2 style={styles.title}>Register Provider</h2>
-          {error && <p style={styles.error}>{error}</p>}
-          {success && <p style={styles.success}>{success}</p>}
-          <form onSubmit={handleRegister} style={styles.form}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Name:</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={styles.input}
-                required
-              />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Contact Info:</label>
-              <input
-                type="text"
-                value={contactInfo}
-                onChange={(e) => setContactInfo(e.target.value)}
-                style={styles.input}
-                required
-              />
-            </div>
-            <button type="submit" style={styles.button} disabled={loading}>
-              {loading ? "Registering..." : "Register"}
-            </button>
-          </form>
+      <Layout isProvider={isProvider}>
+        <div style={styles.container}>
+          <div style={styles.box}>
+            <h2 style={styles.title}>Register Provider</h2>
+            {error && <p style={styles.error}>{error}</p>}
+            {success && <p style={styles.success}>{success}</p>}
+            <form onSubmit={handleRegister} style={styles.form}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Name:</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    style={styles.input}
+                    required
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Contact Info:</label>
+                <input
+                    type="text"
+                    value={contactInfo}
+                    onChange={(e) => setContactInfo(e.target.value)}
+                    style={styles.input}
+                    required
+                />
+              </div>
+              <button type="submit" style={styles.button} disabled={loading}>
+                {loading ? "Registering..." : "Register"}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
   );
 };
 
 export default RegisterProvider;
 
+// Styles
 const styles = {
   container: {
     display: "flex",
