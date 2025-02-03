@@ -61,6 +61,7 @@ contract Twoerr {
     }
 
     function createService(string memory _title, string memory _description, uint _price) external onlyOwner(msg.sender) {
+        providerContract.createService(msg.sender, serviceCounter);
         serviceCounter++;
         services[serviceCounter] = Service({
             id: serviceCounter,
@@ -70,7 +71,6 @@ contract Twoerr {
             price: _price,
             isActive: true
         });
-        providerContract.createService(msg.sender, serviceCounter);
         emit ServiceCreated(serviceCounter, msg.sender, _title, _price);
     }
 

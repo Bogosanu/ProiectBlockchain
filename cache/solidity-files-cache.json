@@ -38,8 +38,8 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\Twoerr.sol": {
-      "lastModificationDate": 1738529051903,
-      "contentHash": "f8f0e024e1f5b037e41fb977f40eb1fe",
+      "lastModificationDate": 1738607681980,
+      "contentHash": "102627c6b73efced64af09ac2e4d14cd",
       "sourceName": "Contracts/Twoerr.sol",
       "solcConfig": {
         "version": "0.8.28",
@@ -78,8 +78,8 @@
       ]
     },
     "D:\\ProiectBlockchain\\Contracts\\Provider.sol": {
-      "lastModificationDate": 1738427789927,
-      "contentHash": "5dcec66f6c00a252dbf0bac2cd4000d6",
+      "lastModificationDate": 1738608607289,
+      "contentHash": "6a37b4d7903ad6fba76c3817ffc6a322",
       "sourceName": "Contracts/Provider.sol",
       "solcConfig": {
         "version": "0.8.28",

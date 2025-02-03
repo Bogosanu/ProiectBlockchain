@@ -22,8 +22,6 @@ contract Provider {
     }
     
 
-
-
     function registerProvider(string memory _name, string memory _contactInfo) public {
         require(bytes(providers[msg.sender].name).length == 0, "Provider already registered");
         providers[msg.sender] = ProviderInfo({
@@ -36,6 +34,7 @@ contract Provider {
     }
 
     function createService(address _provider,uint _serviceID) public {
+        require(bytes(providers[_provider].name).length > 0, "Provider not registered");
         providers[_provider].serviceIds.push(_serviceID);
     }
 
