@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import twoerrABI from "./jsons/Twoerr.json";
+import clientABI from "./jsons/Client.json";
 import addresses from "./jsons/deployedAddresses.json";
 import Layout from './layout';
 
 const LOCAL_NODE_URL = "http://127.0.0.1:8545";
 const TWOERR_CONTRACT_ADDRESS = addresses.Twoerr;
+const CLIENT_CONTRACT_ADDRESS = addresses.Client;
 
 const ProviderOrders = ({ currentAccount }) => {
   const [orders, setOrders] = useState([]);
@@ -19,6 +21,7 @@ const ProviderOrders = ({ currentAccount }) => {
         const provider = new ethers.providers.JsonRpcProvider(LOCAL_NODE_URL);
         const signer = provider.getSigner(currentAccount);
         const twoerrContract = new ethers.Contract(TWOERR_CONTRACT_ADDRESS, twoerrABI.abi, signer);
+        const clientContract = new ethers.Contract(CLIENT_CONTRACT_ADDRESS, clientABI.abi, signer);
 
         const orderCount = await twoerrContract.orderCounter();
         const providerOrders = [];
@@ -28,11 +31,28 @@ const ProviderOrders = ({ currentAccount }) => {
           const fullOrder = await twoerrContract.orders(i);
 
           if (fullOrder.provider === currentAccount) {
+            const clientAddress = fullOrder.client;
+
+            let clientInfo = { name: "Unknown", contactInfo: "Not Available" };
+            try {
+              const clientDetails = await clientContract.clients(clientAddress);
+              if (clientDetails[0].length > 0) {
+                clientInfo = {
+                  name: clientDetails[0],
+                  contactInfo: clientDetails[1],
+                };
+              }
+            } catch (err) {
+              console.warn("Could not fetch client details for:", clientAddress);
+            }
+
             providerOrders.push({
               title: order[0],
               price: ethers.utils.formatEther(order[1]),
               isCompleted: order[2],
               id: i,
+              clientName: clientInfo.name,
+              clientContact: clientInfo.contactInfo,
             });
           }
         }
@@ -60,7 +80,6 @@ const ProviderOrders = ({ currentAccount }) => {
       const tx = await twoerrContract.completeOrder(orderId);
       await tx.wait();
 
-      // Update the order status in the frontend
       setOrders(orders.map(order =>
           order.id === orderId ? { ...order, isCompleted: true } : order
       ));
@@ -89,7 +108,6 @@ const ProviderOrders = ({ currentAccount }) => {
       border: "1px solid #cccccc",
       borderRadius: "10px",
       padding: "20px",
-      cursor: "pointer",
       transition: "transform 0.2s ease",
       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     },
@@ -106,6 +124,14 @@ const ProviderOrders = ({ currentAccount }) => {
     status: {
       fontWeight: "bold",
       marginTop: "10px",
+    },
+    clientInfo: {
+      marginTop: "10px",
+      padding: "10px",
+      backgroundColor: "#f8f9fa",
+      borderRadius: "5px",
+      border: "1px solid #ddd",
+      fontSize: "14px",
     },
     button: {
       backgroundColor: "#28a745",
@@ -125,7 +151,7 @@ const ProviderOrders = ({ currentAccount }) => {
   };
 
   return (
-      <Layout>
+      <Layout isProvider={true}>
         <div style={styles.container}>
           <h1 style={{ textAlign: "center", marginBottom: "20px", color: "#333333" }}>
             My Orders (Provider)
@@ -156,6 +182,13 @@ const ProviderOrders = ({ currentAccount }) => {
                       }}>
                         Status: {order.isCompleted ? "Completed" : "Pending"}
                       </p>
+
+                      {/* Client Information */}
+                      <div style={styles.clientInfo}>
+                        <p><strong>Client:</strong> {order.clientName}</p>
+                        <p><strong>Contact:</strong> {order.clientContact}</p>
+                      </div>
+
                       {!order.isCompleted && (
                           <button
                               style={styles.button}

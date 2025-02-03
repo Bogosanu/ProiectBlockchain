@@ -38,7 +38,7 @@ async function deploy() {
 
 
     const MockAggregator = await ethers.getContractFactory("MockV3Aggregator");
-    const mockAggregator = await MockAggregator.deploy(8, ethers.utils.parseUnits("3000", 8));
+    const mockAggregator = await MockAggregator.deploy(8, ethers.utils.parseUnits("2598.06", 8));
     await mockAggregator.deployed();
     console.log(`MockV3Aggregator deployed at: ${mockAggregator.address}`);
 
