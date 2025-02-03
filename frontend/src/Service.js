@@ -48,7 +48,7 @@ const ServicePage = ({ currentAccount }) => {
   };
 
   return (
-    <Layout>
+      <Layout isProvider={true}>
       <div style={styles.container}>
         <h2>Create Service</h2>
         {error && <p style={styles.error}>{error}</p>}
